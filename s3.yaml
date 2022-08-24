@@ -1,0 +1,89 @@
+---
+- hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: command
+      shell: echo "{{ bucket }}" | cut -d '/' -f1
+      register: BUCKET_NAME
+    - name: get accesspoint list
+      command: aws s3control list-access-points --account-id {{ account_id }} --bucket {{ bucket }}
+      register: AP_LIST
+    - name: Set ap list vals
+      set_fact: aplist="{{ AP_LIST.stdout }}"
+    - name: show ap list
+      debug:
+        msg: "{{ aplist }}"
+    - name: see if any accesspoint exists
+      command: aws s3control create-access-point --account-id {{ account_id }} --bucket {{ bucket }} --name {{ ap_name }}
+      when: (aplist.AccessPointList | length == 0)
+
+    - name: get accesspoint list again
+      command: aws s3control list-access-points --account-id {{ account_id }} --bucket {{ bucket }}
+      register: AP_LIST
+    - name: Set ap list vals again
+      set_fact: aplist="{{ AP_LIST.stdout }}"
+    - name: put accesspoint policy
+      command: aws s3control put-access-point-policy --account-id {{ account_id }} --name {{ ap_name }} --policy file://ap-policy.json
+      loop: "{{ aplist | community.general.json_query('AccessPointList[*].Name') }}"
+      when: item  == ap_name
+
+    - name: get our ap
+      debug:
+        msg: "{{ item }}"
+      loop: "{{ aplist | community.general.json_query('AccessPointList[*].Name') }}"
+      when: item  == ap_name
+
+    - name: get accesspoint policy
+      command: aws s3control get-access-point-policy --account-id {{ account_id }} --name {{ ap_name }}
+      register: AP_POLICY
+    - name: Set ap policy vals
+      set_fact: ap_policy="{{ AP_POLICY.stdout }}"
+    - name: Set ap policy only
+      set_fact: ap_policy_only="{{ ap_policy.Policy }}"
+    - name: show ap policy only
+      debug:
+        msg: "{{ ap_policy_only }}"
+    - name: Create temp-ap-policy.json file
+      copy:
+        content: "{{ ap_policy_only }}"
+        dest: temp-ap-policy.json
+    - name: get Principle
+      command: jq '.Statement[{{ index| int }}].Principal' temp-ap-policy.json
+      loop: "{{ ap_policy_only | community.general.json_query('Statement[*].Principal.AWS') }}"
+      loop_control:
+        index_var: index
+      register: principle
+    - name: show ap policy principle
+      debug:
+        msg: "{{ principle.results[0].stdout }}"
+    - name: when principal is string
+      debug:
+        msg: "{{ principle.results[0].stdout | from_yaml }}"
+      when: principle.results[0].stdout is string
+    - name: set str to yaml
+      set_fact: after_yaml="{{ principle.results[0].stdout | from_yaml }}"
+    - name: show set str to yaml policy principle
+      debug:
+        var: after_yaml['AWS']
+
+    - name: update policy json file
+      command : jq '.Statement[{{ index| int }}].Principal.AWS = [ "{{ after_yaml['AWS'] }}", "{{ role_arn }}" ]' temp-ap-policy.json
+      loop: "{{ ap_policy_only | community.general.json_query('Statement[*].Principal.AWS') }}"
+      loop_control:
+        index_var: index
+      register: policy_updated
+    
+    - name: show updated policy principle
+      debug:
+        msg: "{{ policy_updated.results[0].stdout }}"
+    - name: set updated policy to var
+      set_fact: added_policy_arn="{{ policy_updated.results[0].stdout }}"
+    
+    - name: Overwrite temp-ap-policy.json file
+      copy:
+        content: "{{ added_policy_arn }}"
+        dest: temp-ap-policy.json
+
+    - name: update bucket policy
+      command: aws s3control put-access-point-policy --account-id {{ account_id }} --name {{ ap_name }}  --policy file://temp-ap-policy.json
