@@ -10,7 +10,7 @@
           - arn:aws:iam::aws:policy/AdministratorAccess
         state: present
     - name: create user's key
-      shell: 'aws iam create-access-key --user-name "{{ iam_user }}" >> key.txt'
+      shell: 'aws iam create-access-key --user-name "{{ iam_user }}" > key.txt'
 
     - amazon.aws.s3_bucket:
         name: "{{ bucket }}"

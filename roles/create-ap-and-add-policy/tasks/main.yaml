@@ -1,0 +1,14 @@
+- name: create accesspoint if no accesspoint exists
+  command: aws s3control create-access-point --account-id {{ account_id }} --bucket {{ bucket }} --name {{ ap_name }}
+
+- name: get accesspoint list again
+  command: aws s3control list-access-points --account-id {{ account_id }} --bucket {{ bucket }}
+  register: AP_LIST
+
+- name: Set ap list vals again
+  set_fact: aplist="{{ AP_LIST.stdout }}"
+
+- name: put accesspoint policy
+  command: aws s3control put-access-point-policy --account-id {{ account_id }} --name {{ ap_name }} --policy file://ap-policy.json
+  loop: "{{ aplist | community.general.json_query('AccessPointList[*].Name') }}"
+  when: item  == ap_name

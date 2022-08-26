@@ -1,0 +1,17 @@
+- name: set current policy to var
+  set_fact: current_string="{{ ap_policy_only.Statement[0].Principal.AWS }}"
+
+- name: update ap policy json file inside non list policies
+  include_tasks: update-policy.yaml
+  loop: "{{ ap_policy_only | community.general.json_query('Statement[*].Principal.AWS') }}"
+  loop_control:
+    index_var: index
+    loop_var: loop_items
+
+- name: update bucket policy
+  command: aws s3control put-access-point-policy --account-id {{ account_id }} --name {{ ap_name }}  --policy file://temp-ap-policy.json
+
+- name: update list accesspoint policy file with multiple ARN
+  include_role:
+    name: update-list-policies
+  with_items: "{{ role_arn | split(',') | flatten }}"

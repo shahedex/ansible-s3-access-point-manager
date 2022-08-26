@@ -4,13 +4,13 @@
         {
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::456269942226:user/ansible-test"
+                "AWS": "arn:aws:iam::349383154381:user/ansible-test"
             },
             "Action": [
                 "s3:GetObject",
                 "s3:PutObject"
             ],
-            "Resource": "arn:aws:s3:us-east-1:456269942226:accesspoint/demo-ap1/object/*"
+            "Resource": "arn:aws:s3:us-east-1:349383154381:accesspoint/demo-ap6/object/*"
         }
     ]
 }

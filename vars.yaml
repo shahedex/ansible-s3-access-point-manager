@@ -1,6 +1,7 @@
 ---
-bucket: s3-ap-test-ansible-3
-account_id: 456269942226
-ap_name: demo-ap1
-role_arn: arn:aws:iam::476533878911:user/hx-visible-alpha
+bucket: s3-ap-test-ansible-4
+account_id: 349383154381
+ap_name: demo-ap6
+role_arn: arn:aws:iam::476533878911:user/hx-visible-alpha, arn:aws:iam::349383154381:user/ap-test-ansible, arn:aws:iam::349383154381:user/ap-test-ansible-2
 iam_user: ansible-test
+

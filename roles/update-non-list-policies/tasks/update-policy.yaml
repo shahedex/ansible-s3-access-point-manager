@@ -1,0 +1,15 @@
+- name: update ap policy json file inside non list
+  command : jq '.Statement[{{ index| int }}].Principal.AWS = [ "{{ current_string }}", "{{ role_arn | split(',') | flatten | first | trim }}" ]' temp-ap-policy.json
+  register: policy_updated
+
+- name: show updated policy principle
+  debug:
+    msg: "{{ policy_updated.stdout }}"
+    
+- name: set updated policy to var
+  set_fact: added_policy_arn="{{ policy_updated.stdout }}"
+
+- name: Overwrite temp-ap-policy.json file
+  copy:
+    content: "{{ added_policy_arn }}"
+    dest: temp-ap-policy.json
