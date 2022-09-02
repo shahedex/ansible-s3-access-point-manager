@@ -8,6 +8,11 @@
 - name: Set ap list vals again
   set_fact: aplist="{{ AP_LIST.stdout }}"
 
+- name: Set the ap-policy file
+  template:
+    src: ap-policy.j2
+    dest: ap-policy.json
+    
 - name: put accesspoint policy
   command: aws s3control put-access-point-policy --account-id {{ account_id }} --name {{ ap_name }} --policy file://ap-policy.json
   loop: "{{ aplist | community.general.json_query('AccessPointList[*].Name') }}"

@@ -10,7 +10,7 @@
                 "s3:GetObject",
                 "s3:PutObject"
             ],
-            "Resource": "arn:aws:s3:us-east-1:211442454782:accesspoint/demo-ap5/object/*"
+            "Resource": "arn:aws:s3:us-east-1:{{ account_id }}:accesspoint/{{ ap_name }}/object/*"
         }
     ]
 }
