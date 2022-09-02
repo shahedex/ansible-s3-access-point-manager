@@ -66,3 +66,11 @@
         name: update-list-policies
       with_items: "{{ role_arn | split(',') | flatten }}"
       when: ap_policy_only.Statement[0].Principal.AWS | type_debug == "list"
+
+    - name: cleaning up temp files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - ap-policy.json
+        - temp-ap-policy.json
