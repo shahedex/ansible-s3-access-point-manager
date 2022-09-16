@@ -22,7 +22,7 @@
       when: item  == ap_name
       register: ap_exists
 
-    - name: demoss
+    - name: print to see value of ap_exists
       debug:
         var: ap_exists
 

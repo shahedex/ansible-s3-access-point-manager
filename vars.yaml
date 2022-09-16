@@ -1,8 +1,9 @@
 ---
-bucket: s3-ap-test-ansible-5
+environment: staging
 account_id: 211442454782
+bucket: s3-ap-test-ansible-5
 ap_name: demo-ap6
+dir_name: test-1
+default_arn: arn:aws:iam::211442454782:user/ansible-test
 role_arn: arn:aws:iam::476533878911:user/hx-visible-alpha
 iam_user: ansible-test
-
-# arn:aws:iam::349383154381:user/ap-test-ansible-2

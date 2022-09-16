@@ -1,26 +1,3 @@
-# - name: get our ap
-#   debug:
-#     msg: "{{ item }}"
-#   loop: "{{ aplist | community.general.json_query('AccessPointList[*].Name') }}"
-#   when: item  == ap_name
-
-# - name: get accesspoint policy
-#   command: aws s3control get-access-point-policy --account-id {{ account_id }} --name {{ ap_name }}
-#   register: AP_POLICY
-# - name: Set ap policy vals
-#   set_fact: ap_policy="{{ AP_POLICY.stdout }}"
-# - name: Set ap policy only
-#   set_fact: ap_policy_only="{{ ap_policy.Policy }}"
-# - name: show ap policy only
-#   debug:
-#     msg: "{{ ap_policy_only }}"
-# - name: Create temp-ap-policy.json file
-#   copy:
-#     content: "{{ ap_policy_only }}"
-#     dest: temp-ap-policy.json
-
-
-
 - name: show split arn list
   debug:
     msg: "{{ item }}"
